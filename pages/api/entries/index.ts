@@ -15,6 +15,9 @@ export default function handler(
     case "POST":
       return addEntry(req, res);
 
+    case "PUT":
+      return res.status(400).json({ message: "method PUT not implemented" });
+
     default:
       return res.status(400).json({ message: "Invalid method" });
   }
