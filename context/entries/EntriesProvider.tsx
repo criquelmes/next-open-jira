@@ -1,34 +1,16 @@
-import { FC, ReactNode, useReducer } from "react";
+import { FC, ReactNode, useEffect, useReducer } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { EntriesContext } from "./EntriesContext";
 import { entriesReducer } from "./entriesReducer";
 import { Entry } from "../../interfaces";
+import { entriesApi } from "../../apis";
 
 export interface EntriesState {
   entries: Entry[];
 }
 
 const Entries_INITIAL_STATE: EntriesState = {
-  entries: [
-    {
-      _id: uuidv4(),
-      description: "Pendiente: Create a new project",
-      createdAt: Date.now(),
-      status: "pending",
-    },
-    {
-      _id: uuidv4(),
-      description: "En-Progreso: Update the README file",
-      createdAt: Date.now() - 1000000,
-      status: "in-progress",
-    },
-    {
-      _id: uuidv4(),
-      description: "Terminadas: Push the changes to GitHub",
-      createdAt: Date.now() - 10000,
-      status: "finished",
-    },
-  ],
+  entries: [],
 };
 
 export const EntriesProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -48,6 +30,15 @@ export const EntriesProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const onEntryUpdated = (entry: Entry) => {
     dispatch({ type: "[Entry] Entry-Updated", payload: entry });
   };
+
+  const refreshEntries = async () => {
+    const { data } = await entriesApi.get<Entry[]>("/entries");
+    dispatch({ type: "[Entry] Entries-Loaded", payload: data });
+  };
+
+  useEffect(() => {
+    refreshEntries();
+  }, []);
 
   return (
     <EntriesContext.Provider
